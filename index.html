@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Landing — Scroll to Reveal</title>
+<style>
+  :root{
+    --bg: #000;
+    --block-bg: #fff;
+    --block-color: #000;
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    background:var(--bg);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  .wrap{
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+    box-sizing:border-box;
+  }
+  .block{
+    background:var(--block-bg);
+    color:var(--block-color);
+    width:min(72vw, 680px);
+    max-width:680px;
+    height:200px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    position:relative;
+    overflow:hidden;
+    padding:24px;
+    box-sizing:border-box;
+  }
+  .text{
+    font-size:28px;
+    line-height:1.1;
+    text-align:center;
+    font-weight:600;
+    user-select:none;
+    pointer-events:none;
+    white-space:nowrap;
+    transform-origin:center;
+    transition: transform 220ms ease, opacity 220ms ease;
+  }
+  .text.fade-out{
+    transform: translateY(-8px) scale(0.995);
+    opacity:0;
+  }
+  .text.fade-in{
+    transform: translateY(0) scale(1);
+    opacity:1;
+  }
+  .continue-btn{
+    position:absolute;
+    bottom:18px;
+    right:18px;
+    background:var(--block-bg);
+    color:var(--block-color);
+    border:1px solid rgba(0,0,0,0.06);
+    padding:10px 14px;
+    border-radius:8px;
+    font-weight:600;
+    text-decoration:none;
+    display:inline-block;
+    transform: scale(0.8);
+    opacity:0;
+    pointer-events:none;
+    transition: transform 300ms cubic-bezier(.2,.9,.3,1), opacity 300ms ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+  .continue-btn.visible{
+    transform: scale(1);
+    opacity:1;
+    pointer-events:auto;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="block" id="block" aria-live="polite" aria-atomic="true" tabindex="0">
+      <div class="text fade-in" id="word"> </div>
+      <a id="continue" class="continue-btn" href="/products.html">continue to consume?</a>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const phrase = "THIS GENERATION LACKS THE BELIEVE IN GOD.";
+  const words = phrase.split(/\s+/);
+  let idx = 0;
+  const wordEl = document.getElementById('word');
+  const contBtn = document.getElementById('continue');
+  const block = document.getElementById('block');
+
+  wordEl.textContent = words[0] || "";
+  contBtn.classList.remove('visible');
+
+  let lastWheelTime = 0;
+  const wheelDelay = 80;
+
+  function render(index){
+    index = Math.max(0, Math.min(words.length - 1, index));
+    if (index === idx) return;
+    idx = index;
+
+    wordEl.classList.remove('fade-in');
+    wordEl.classList.add('fade-out');
+
+    setTimeout(()=>{
+      wordEl.textContent = words[idx] || "";
+      wordEl.classList.remove('fade-out');
+      wordEl.classList.add('fade-in');
+    }, 120);
+
+    if (idx === words.length - 1){
+      setTimeout(()=> contBtn.classList.add('visible'), 320);
+    } else {
+      contBtn.classList.remove('visible');
+    }
+  }
+
+  window.addEventListener('wheel', function(e){
+    const now = Date.now();
+    if (now - lastWheelTime < wheelDelay) return;
+    lastWheelTime = now;
+
+    if (e.deltaY > 0) render(idx + 1);
+    else if (e.deltaY < 0) render(idx - 1);
+
+    e.preventDefault && e.preventDefault();
+  }, {passive:false});
+})();
+</script>
+</body>
+</html>
